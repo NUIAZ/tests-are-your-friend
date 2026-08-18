@@ -136,6 +136,11 @@ npm run test:watch  # re-runs on save; leave it open in a corner
 npm run dev         # the demo page at http://localhost:5173
 ```
 
+Note: double-clicking `index.html` will show the form but no result. The page
+loads `src/main.ts` as a module and it is Vite that compiles the TypeScript on
+the fly, so it needs `npm run dev` (or the hosted demo above), not a `file://`
+URL.
+
 ## Files
 
 ```

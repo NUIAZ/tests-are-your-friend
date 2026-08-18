@@ -1,5 +1,14 @@
-// docs/screenshot.mjs: captures docs/demo.png of the running page. Playwright is
-// not a dependency of this repo; point PLAYWRIGHT_DIR at any project that has it.
+// docs/screenshot.mjs: captures docs/demo.png of the running page.
+//
+// It starts Vite in-process on a fixed port, fills in the $10 / 3 people case
+// (the one that exposes v1's penny bug), screenshots just the card, and prints
+// the "Shares add up to ..." line so you can see at a glance which version you
+// captured ($9.99 = v1, $10.00 = fixed). To capture v1, `git show
+// v1-works-on-my-machine:src/split.ts > src/split.ts` first, then restore.
+//
+// Playwright is deliberately not a dependency of this repo (it is large and
+// only needed for this one image); point PLAYWRIGHT_DIR at any project that
+// has it, and BROWSER_CHANNEL=msedge|chrome to use an installed browser:
 //   PLAYWRIGHT_DIR=../some-project/node_modules/playwright BROWSER_CHANNEL=msedge node docs/screenshot.mjs
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';

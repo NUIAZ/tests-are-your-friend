@@ -18,10 +18,12 @@ for cand in (r"C:\Windows\Fonts\consola.ttf", "/usr/share/fonts/truetype/dejavu/
 if FONT is None:
     FONT = ImageFont.load_default()
 
+# GitHub-dark palette so the PNGs sit naturally in a README rendered on GitHub.
 BG = (13, 17, 23); FG = (230, 237, 243); DIM = (145, 152, 161)
 GREEN = (63, 185, 80); RED = (248, 81, 73); YELLOW = (210, 153, 34)
 
 def colour_for(line: str):
+    """Pick a colour by what kind of vitest line this is (pass, fail, diff, meta)."""
     s = line.strip()
     if s.startswith("✓") or " passed" in s and "Tests" in s: return GREEN
     if s.startswith("×") or s.startswith("FAIL") or "failed" in s and "Tests" in s: return RED
@@ -30,6 +32,7 @@ def colour_for(line: str):
     return FG
 
 def render(src: str, out: str, keep):
+    """Read a saved vitest transcript, filter it with `keep`, paint one line per row."""
     lines = open(os.path.join(HERE, src), encoding="utf-8").read().splitlines()
     lines = keep(lines)
     pad, lh = 18, 22
@@ -45,7 +48,9 @@ def render(src: str, out: str, keep):
     print("wrote", out, img.size)
 
 def red_keep(lines):
-    # The per-test list plus the first failure's assertion, plus the summary.
+    """For the red image: every PASS/FAIL line, then the first failure's
+    assertion detail (the $10-three-ways one, which is the story), then the
+    summary. The other seven failure details would make the image a scroll."""
     out = [l for l in lines if l.strip().startswith(("✓", "×"))]
     out.append("")
     grab, first = False, []
@@ -60,6 +65,8 @@ def red_keep(lines):
     return out
 
 def green_keep(lines):
+    """For the green image: every PASS line and the summary, including Duration
+    so the "tests 7ms" figure is on the record."""
     out = [l for l in lines if l.strip().startswith(("✓", "×"))]
     out.append("")
     out += [l for l in lines if l.strip().startswith(("Test Files", "Tests ", "Duration"))]

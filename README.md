@@ -108,7 +108,9 @@ units are visible, and adds an optional feature (`pennyOrder`: who eats the
 extra pennies). The diff touches almost every line of the source file.
 
 The test file is not in the diff. Not one line changed. All 18 stayed green the
-whole way through, and that is what let the refactor happen at all. Without
+whole way through, and that is what let the refactor happen at all. (A later
+"docs" commit adds comments to the test file explaining each case; compare
+`v2b-green..v3-refactor` to see the refactor diff on its own.) Without
 them, "let me just tidy this up" is a risk you weigh; with them, it is a thing
 you do.
 

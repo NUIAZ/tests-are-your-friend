@@ -1,0 +1,167 @@
+
+ RUN  v3.2.7 C:/Users/ryan.gross.CORP/Desktop/tests-are-your-friend
+
+ ❯ tests/split.test.ts (18 tests | 8 failed) 13ms
+   ✓ the easy cases > adds tax and tip to the subtotal 1ms
+   ✓ the easy cases > splits an even total evenly 0ms
+   ✓ the easy cases > handles zero tax and zero tip 0ms
+   ✓ the easy cases > gives one entry per person 1ms
+   × the money actually adds up > shares sum to the total: $10 three ways 5ms
+     → expected 999 to be 1000 // Object.is equality
+   ✓ the money actually adds up > shares sum to the total: a realistic dinner 0ms
+   × the money actually adds up > shares sum to the total: 200 random bills 0ms
+     → {"subtotal":10.2,"taxRate":0.0025,"tipPercent":16,"people":8}: expected 1184 to be 1186 // Object.is equality
+   × the money actually adds up > spreads leftover pennies deterministically (first people pay the extra cent) 1ms
+     → expected [ 3.33, 3.33, 3.33 ] to deeply equal [ 3.34, 3.33, 3.33 ]
+   ✓ the money actually adds up > never gives anyone more than one cent above anyone else 0ms
+   × rounding is honest > rounds half a cent up, the way a cashier would 0ms
+     → expected 1 to be 1.01 // Object.is equality
+   ✓ rounding is honest > never returns fractions of a cent 0ms
+   × bad input is refused, not silently mangled > rejects zero people 2ms
+     → expected [Function] to throw an error
+   ✓ bad input is refused, not silently mangled > rejects a fractional head count 0ms
+   × bad input is refused, not silently mangled > rejects a negative subtotal 0ms
+     → expected [Function] to throw an error
+   × bad input is refused, not silently mangled > rejects a negative tip 0ms
+     → expected [Function] to throw an error
+   × bad input is refused, not silently mangled > rejects NaN anywhere 0ms
+     → expected [Function] to throw an error
+   ✓ it behaves like a function > does not mutate its input 0ms
+   ✓ it behaves like a function > is deterministic 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/split.test.ts > the money actually adds up > shares sum to the total: $10 three ways
+AssertionError: expected 999 to be 1000 // Object.is equality
+
+- Expected
++ Received
+
+- 1000
++ 999
+
+ ❯ tests/split.test.ts:45:37
+     43|   it('shares sum to the total: $10 three ways', () => {
+     44|     const r = splitBill({ subtotal: 10, taxRate: 0, tipPercent: 0, peo…
+     45|     expect(cents(sum(r.perPerson))).toBe(cents(r.total));
+       |                                     ^
+     46|   });
+     47| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  tests/split.test.ts > the money actually adds up > shares sum to the total: 200 random bills
+AssertionError: {"subtotal":10.2,"taxRate":0.0025,"tipPercent":16,"people":8}: expected 1184 to be 1186 // Object.is equality
+
+- Expected
++ Received
+
+- 1186
++ 1184
+
+ ❯ tests/split.test.ts:65:62
+     63|       };
+     64|       const r = splitBill(input);
+     65|       expect(cents(sum(r.perPerson)), JSON.stringify(input)).toBe(cent…
+       |                                                              ^
+     66|     }
+     67|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  tests/split.test.ts > the money actually adds up > spreads leftover pennies deterministically (first people pay the extra cent)
+AssertionError: expected [ 3.33, 3.33, 3.33 ] to deeply equal [ 3.34, 3.33, 3.33 ]
+
+- Expected
++ Received
+
+  [
+-   3.34,
++   3.33,
+    3.33,
+    3.33,
+  ]
+
+ ❯ tests/split.test.ts:71:25
+     69|   it('spreads leftover pennies deterministically (first people pay the…
+     70|     const r = splitBill({ subtotal: 10, taxRate: 0, tipPercent: 0, peo…
+     71|     expect(r.perPerson).toEqual([3.34, 3.33, 3.33]);
+       |                         ^
+     72|   });
+     73| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  tests/split.test.ts > rounding is honest > rounds half a cent up, the way a cashier would
+AssertionError: expected 1 to be 1.01 // Object.is equality
+
+- Expected
++ Received
+
+- 1.01
++ 1
+
+ ❯ tests/split.test.ts:86:21
+     84|     // 1.005 is the classic floating-point trap: Math.round(1.005 * 10…
+     85|     const r = splitBill({ subtotal: 1.005, taxRate: 0, tipPercent: 0, …
+     86|     expect(r.total).toBe(1.01);
+       |                     ^
+     87|   });
+     88| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  tests/split.test.ts > bad input is refused, not silently mangled > rejects zero people
+AssertionError: expected [Function] to throw an error
+ ❯ tests/split.test.ts:99:85
+     97| describe('bad input is refused, not silently mangled', () => {
+     98|   it('rejects zero people', () => {
+     99|     expect(() => splitBill({ subtotal: 10, taxRate: 0, tipPercent: 0, …
+       |                                                                                     ^
+    100|   });
+    101| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  tests/split.test.ts > bad input is refused, not silently mangled > rejects a negative subtotal
+AssertionError: expected [Function] to throw an error
+ ❯ tests/split.test.ts:107:85
+    105| 
+    106|   it('rejects a negative subtotal', () => {
+    107|     expect(() => splitBill({ subtotal: -5, taxRate: 0, tipPercent: 0, …
+       |                                                                                     ^
+    108|   });
+    109| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  tests/split.test.ts > bad input is refused, not silently mangled > rejects a negative tip
+AssertionError: expected [Function] to throw an error
+ ❯ tests/split.test.ts:111:87
+    109| 
+    110|   it('rejects a negative tip', () => {
+    111|     expect(() => splitBill({ subtotal: 10, taxRate: 0, tipPercent: -10…
+       |                                                                                       ^
+    112|   });
+    113| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  tests/split.test.ts > bad input is refused, not silently mangled > rejects NaN anywhere
+AssertionError: expected [Function] to throw an error
+ ❯ tests/split.test.ts:115:86
+    113| 
+    114|   it('rejects NaN anywhere', () => {
+    115|     expect(() => splitBill({ subtotal: NaN, taxRate: 0, tipPercent: 0,…
+       |                                                                                      ^
+    116|     expect(() => splitBill({ subtotal: 10, taxRate: NaN, tipPercent: 0…
+    117|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  8 failed | 10 passed (18)
+   Start at  06:37:19
+   Duration  464ms (transform 32ms, setup 0ms, collect 33ms, tests 13ms, environment 0ms, prepare 117ms)
+

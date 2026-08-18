@@ -1,0 +1,20 @@
+{
+  "name": "tests-are-your-friend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A bill splitter small enough to read in one sitting, and the unit tests that found the bugs clicking around never would. Companion to a LinkedIn post: unit tests are your friend, not your foe.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.0",
+    "vite": "^7.1.0",
+    "vitest": "^3.2.0"
+  }
+}

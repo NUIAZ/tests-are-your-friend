@@ -4,14 +4,13 @@
  * Given the subtotal, a tax rate, a tip percentage and a head count, work out
  * the grand total and what each person owes.
  *
- * v2: the tests found three things v1 got wrong.
- *   1. Shares did not add up to the total ($10 three ways gave 3 x $3.33 =
- *      $9.99). Fixed by working in whole cents and handing the leftover
- *      pennies to the first few people, so the sum is exact by construction.
- *   2. $1.005 rounded DOWN to $1.00 because 1.005 * 100 is 100.49999... in
- *      floating point. Fixed by rounding with an epsilon nudge.
- *   3. Nonsense input (0 people, negative amounts, NaN) produced Infinity or
- *      NaN instead of an error. Fixed by validating up front.
+ * v3: refactor. v2 was correct but everything lived in one function. This
+ * version pulls out three named helpers (validate, toCents, distributeCents),
+ * does all arithmetic on a small `cents` type, and adds an optional feature
+ * (choose who eats the extra pennies). Not one line of tests/split.test.ts
+ * changed between v2 and v3, and all 18 stayed green throughout. That is what
+ * the tests are for: they let you rearrange the furniture without wondering
+ * whether you broke the plumbing.
  */
 
 export interface BillInput {
@@ -23,6 +22,12 @@ export interface BillInput {
   tipPercent: number;
   /** How many people are splitting it */
   people: number;
+  /**
+   * Who pays the leftover pennies when the total does not divide evenly.
+   * 'first' (default): people 1..r pay one cent more. 'last': people n-r+1..n.
+   * The sum is exact either way; this only decides whose share is bigger.
+   */
+  pennyOrder?: 'first' | 'last';
 }
 
 export interface BillResult {
@@ -33,14 +38,12 @@ export interface BillResult {
   perPerson: number[];
 }
 
-/** Dollars to whole cents, rounding half up (1.005 -> 101, not 100). */
-function toCents(dollars: number): number {
-  return Math.round(dollars * 100 + Number.EPSILON * 1000);
-}
+/** Whole cents. A plain number, named so the intent is visible at call sites. */
+type Cents = number;
 
-export function splitBill(input: BillInput): BillResult {
-  const { subtotal, taxRate, tipPercent, people } = input;
-
+/** Throw a readable error for input that cannot be split. */
+function validate(input: BillInput): void {
+  const { subtotal, taxRate, tipPercent, people, pennyOrder = 'first' } = input;
   if (![subtotal, taxRate, tipPercent, people].every(Number.isFinite)) {
     throw new Error('All inputs must be finite numbers.');
   }
@@ -50,22 +53,54 @@ export function splitBill(input: BillInput): BillResult {
   if (!Number.isInteger(people) || people < 1) {
     throw new Error('People must be a whole number of at least 1.');
   }
+  if (pennyOrder !== 'first' && pennyOrder !== 'last') {
+    throw new Error("pennyOrder must be 'first' or 'last'.");
+  }
+}
+
+/**
+ * Dollars to whole cents, rounding half up. The epsilon nudge is there because
+ * 1.005 * 100 is 100.49999999999999 in IEEE-754, and Math.round would send it
+ * the wrong way. Cashiers round half up; so do we.
+ */
+export function toCents(dollars: number): Cents {
+  return Math.round(dollars * 100 + Number.EPSILON * 1000);
+}
+
+/** Cents back to dollars for the caller. */
+export function fromCents(c: Cents): number {
+  return c / 100;
+}
+
+/**
+ * Split `total` cents into `n` whole-cent shares that sum to exactly `total`.
+ * Everyone gets floor(total / n); the `remainder` leftover cents go one each
+ * to the first (or last) `remainder` people. Exported because it is the
+ * reusable idea in this file: it works for cents, seats, or anything else that
+ * must be shared without loss.
+ */
+export function distributeCents(total: Cents, n: number, order: 'first' | 'last' = 'first'): Cents[] {
+  const base = Math.floor(total / n);
+  const remainder = total - base * n;
+  return Array.from({ length: n }, (_, i) => {
+    const getsExtra = order === 'first' ? i < remainder : i >= n - remainder;
+    return base + (getsExtra ? 1 : 0);
+  });
+}
+
+export function splitBill(input: BillInput): BillResult {
+  validate(input);
+  const { subtotal, taxRate, tipPercent, people, pennyOrder = 'first' } = input;
 
   const subtotalC = toCents(subtotal);
-  const taxC = Math.round(subtotalC * taxRate);
-  const tipC = Math.round(subtotalC * (tipPercent / 100));
-  const totalC = subtotalC + taxC + tipC;
-
-  // Everyone pays the floor share; the first `remainder` people pay one cent
-  // more. Sum is exactly totalC, no matter what.
-  const base = Math.floor(totalC / people);
-  const remainder = totalC - base * people;
-  const perPersonC = Array.from({ length: people }, (_, i) => base + (i < remainder ? 1 : 0));
+  const taxC: Cents = Math.round(subtotalC * taxRate);
+  const tipC: Cents = Math.round(subtotalC * (tipPercent / 100));
+  const totalC: Cents = subtotalC + taxC + tipC;
 
   return {
-    tax: taxC / 100,
-    tip: tipC / 100,
-    total: totalC / 100,
-    perPerson: perPersonC.map(c => c / 100),
+    tax: fromCents(taxC),
+    tip: fromCents(tipC),
+    total: fromCents(totalC),
+    perPerson: distributeCents(totalC, people, pennyOrder).map(fromCents),
   };
 }

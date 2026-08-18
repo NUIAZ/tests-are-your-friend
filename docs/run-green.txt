@@ -1,10 +1,27 @@
 
  RUN  v3.2.7 C:/Users/ryan.gross.CORP/Desktop/tests-are-your-friend
 
- ✓ tests/split.test.ts (18 tests) 7ms
+ ✓ tests/split.test.ts > the easy cases > adds tax and tip to the subtotal 1ms
+ ✓ tests/split.test.ts > the easy cases > splits an even total evenly 0ms
+ ✓ tests/split.test.ts > the easy cases > handles zero tax and zero tip 0ms
+ ✓ tests/split.test.ts > the easy cases > gives one entry per person 1ms
+ ✓ tests/split.test.ts > the money actually adds up > shares sum to the total: $10 three ways 0ms
+ ✓ tests/split.test.ts > the money actually adds up > shares sum to the total: a realistic dinner 0ms
+ ✓ tests/split.test.ts > the money actually adds up > shares sum to the total: 200 random bills 2ms
+ ✓ tests/split.test.ts > the money actually adds up > spreads leftover pennies deterministically (first people pay the extra cent) 0ms
+ ✓ tests/split.test.ts > the money actually adds up > never gives anyone more than one cent above anyone else 0ms
+ ✓ tests/split.test.ts > rounding is honest > rounds half a cent up, the way a cashier would 0ms
+ ✓ tests/split.test.ts > rounding is honest > never returns fractions of a cent 0ms
+ ✓ tests/split.test.ts > bad input is refused, not silently mangled > rejects zero people 0ms
+ ✓ tests/split.test.ts > bad input is refused, not silently mangled > rejects a fractional head count 0ms
+ ✓ tests/split.test.ts > bad input is refused, not silently mangled > rejects a negative subtotal 0ms
+ ✓ tests/split.test.ts > bad input is refused, not silently mangled > rejects a negative tip 0ms
+ ✓ tests/split.test.ts > bad input is refused, not silently mangled > rejects NaN anywhere 0ms
+ ✓ tests/split.test.ts > it behaves like a function > does not mutate its input 0ms
+ ✓ tests/split.test.ts > it behaves like a function > is deterministic 0ms
 
  Test Files  1 passed (1)
       Tests  18 passed (18)
-   Start at  06:37:46
-   Duration  497ms (transform 35ms, setup 0ms, collect 35ms, tests 7ms, environment 0ms, prepare 134ms)
+   Start at  06:39:42
+   Duration  445ms (transform 39ms, setup 0ms, collect 32ms, tests 7ms, environment 0ms, prepare 157ms)
 
